@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#7ec8f0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍊</text></svg>">
+<title>Capi Corre</title>
+<link rel="stylesheet" href="style.css?v=1">
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud" class="hidden"><div id="hudScore">0</div><div id="hudCoins">🪙 0</div></div>
+<button id="muteBtn" class="round" aria-label="Sonido">🔊</button>
+<button id="pauseBtn" class="round hidden" aria-label="Pausa">⏸</button>
+<button id="duckBtn" class="hidden" aria-label="Agacharse">▼</button>
+
+<div id="title" class="screen">
+  <h1>Capi<span>Corre</span></h1>
+  <p class="sub">¡Corre, salta y no pierdas tu mandarina!</p>
+  <div class="stats"><span>🏆 <b id="tBest">0</b></span><span>🪙 <b id="tCoins">0</b></span></div>
+  <button id="playBtn" class="big">▶ Jugar</button>
+  <button id="shopBtn" class="mid">🐾 Personajes</button>
+</div>
+
+<div id="over" class="screen hidden">
+  <h2 id="overTitle">¡Ups!</h2>
+  <div class="card">
+    <div class="row"><span>Distancia</span><b id="oScore">0</b></div>
+    <div class="row"><span>Récord</span><b id="oBest">0</b></div>
+    <div class="row"><span>Monedas</span><b id="oCoins">0</b></div>
+    <div id="newRec" class="hidden">¡Nuevo récord! 🎉</div>
+  </div>
+  <button id="retryBtn" class="big">↻ Otra vez</button>
+  <button id="homeBtn" class="mid">🏠 Inicio</button>
+</div>
+
+<div id="shop" class="screen hidden">
+  <h2>Personajes</h2>
+  <p class="sub">Tienes 🪙 <b id="sCoins">0</b></p>
+  <div id="chars"></div>
+  <button id="backBtn" class="mid">← Volver</button>
+</div>
+
+<div id="paused" class="screen hidden">
+  <h2>Pausa</h2>
+  <button id="resumeBtn" class="big">▶ Seguir</button>
+  <button id="quitBtn" class="mid">🏠 Inicio</button>
+</div>
+
+<div id="rotate" class="screen hidden">
+  <div class="phone">📱</div>
+  <h2>Gira el teléfono</h2>
+  <p class="sub">Capi corre mejor en horizontal</p>
+  <button id="portraitBtn" class="mid">Jugar en vertical</button>
+</div>
+<script src="game.js?v=1"></script>
+</body>
+</html>
