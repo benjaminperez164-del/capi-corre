@@ -1,13 +1,13 @@
 // Capi Corre — juego de carreras infinito con un capibara
 (function(){
 'use strict';
-const VERSION='0.4.3';
+const VERSION='0.4.4';
 const HERO_S=1;
 // sprites ilustrados (px por unidad de juego)
 let sprN=0;function sprLoaded(){if(++sprN>=8){const l=document.getElementById('loading');if(l)l.classList.add('hidden');}}
 setTimeout(()=>{const l=document.getElementById('loading');if(l)l.classList.add('hidden');},8000);
 const SPR={},SPR_PX={capi:3.4,gallina:4.3,gallo:4.1};
-['capi_run1','capi_run2','capi_duck','capi_hurt','gallina_run','gallina_glide','gallo_run','gallo_flap'].forEach(n=>{const i=new Image();i.onload=()=>{SPR[n]=i;sprLoaded();if(window.__onSpr)window.__onSpr();};i.onerror=sprLoaded;i.src='img/'+n+'.png?v=9';});
+['capi_run1','capi_run2','capi_duck','capi_hurt','gallina_run','gallina_glide','gallo_run','gallo_flap'].forEach(n=>{const i=new Image();i.onload=()=>{SPR[n]=i;sprLoaded();if(window.__onSpr)window.__onSpr();};i.onerror=sprLoaded;i.src='img/'+n+'.png?v=10';});
 function sprDim(n,id){const i=SPR[n],k=SPR_PX[id];return i?{w:i.width/k,h:i.height/k}:{w:90,h:75};}
 const $=id=>document.getElementById(id);
 const cv=$('c'),ctx=cv.getContext('2d');
@@ -18,19 +18,32 @@ const CHARS=[
  {id:'gallo',name:'Gallo',price:300,desc:'¡Kikirikí! Salta más alto y aletea otra vez en el aire (doble salto).'}
 ];
 let save={best:LS.get('best',0),coins:LS.get('coins',0),owned:LS.get('owned',['capi']),sel:LS.get('sel','capi'),mute:LS.get('mute',false),tut:LS.get('tut',false)};
+(function fixSave(){
+ const num=v=>Number.isFinite(+v)&&+v>=0?Math.floor(+v):0;
+ save.best=num(save.best);save.coins=num(save.coins);
+ if(!Array.isArray(save.owned))save.owned=['capi'];
+ save.owned=save.owned.filter(id=>CHARS.some(c=>c.id===id));if(!save.owned.includes('capi'))save.owned.unshift('capi');
+ if(!save.owned.includes(save.sel))save.sel='capi';
+ save.mute=!!save.mute;save.tut=!!save.tut;
+})();
 function persist(){LS.set('best',save.best);LS.set('coins',save.coins);LS.set('owned',save.owned);LS.set('sel',save.sel);LS.set('mute',save.mute);LS.set('tut',save.tut)}
 
 // ---------- pantalla ----------
 let W=0,H=0,S=1,VW=640,VH=360,GY=298,dpr=1,rotateActive=false;
 function resize(){
- W=innerWidth;H=innerHeight;dpr=Math.min(devicePixelRatio||1,2.5);
+ // al abrir la app instalada el tamaño puede ser 0 un instante: usar respaldo y reintentar
+ W=innerWidth||document.documentElement.clientWidth||(screen&&screen.width)||844;
+ H=innerHeight||document.documentElement.clientHeight||(screen&&screen.height)||390;
+ W=Math.max(1,W);H=Math.max(1,H);
+ dpr=Math.min(devicePixelRatio||1,2.5);
  cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
  S=H/360; if(W/S<560) S=W/560;
  VW=W/S;VH=H/S;GY=VH-62;
  if(H>W){S=W/440;VW=W/S;VH=H/S;GY=Math.round(VH*0.70);}
  checkRotate();
 }
-addEventListener('resize',resize);
+addEventListener('resize',resize);addEventListener('orientationchange',()=>setTimeout(resize,150));addEventListener('pageshow',resize);
+if(window.visualViewport)visualViewport.addEventListener('resize',resize);
 function checkRotate(){
  const portrait=H>W*1.1;
  if(rotateActive&&!portrait){rotateActive=false;}
@@ -121,7 +134,9 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden&&state==='p
 function show(id){['title','over','shop','paused'].forEach(s=>$(s).classList.toggle('hidden',s!==id));}
 function refreshTitle(){$('tBest').textContent=save.best;$('tCoins').textContent=save.coins;}
 function startGame(){
- audio();sfx.click();reset();state='play';if(save.sel==='gallo')setTimeout(sfx.kiki,150);show(null);
+ ['loading','installCard','rotate'].forEach(id=>{const el=$(id);if(el)el.classList.add('hidden');});
+ try{audio();sfx.click();}catch(e){}
+ resize();reset();state='play';if(save.sel==='gallo')setTimeout(sfx.kiki,150);show(null);
  $('hud').classList.remove('hidden');$('duckBtn').classList.remove('hidden');$('pauseBtn').classList.remove('hidden');
 }
 function toTitle(){state='title';reset();refreshTitle();show('title');$('hud').classList.add('hidden');$('duckBtn').classList.add('hidden');$('pauseBtn').classList.add('hidden');}
@@ -544,11 +559,13 @@ function draw(){
  if(state==='play'&&slowT>0){ctx.font='bold 18px sans-serif';ctx.textAlign='center';ctx.fillStyle='#fff';ctx.fillText('¡Splash!',p.x,GY+p.y-62);}
 }
 let last=performance.now();
+let errShown=0;
 function loop(t){
- const dt=Math.min(0.033,(t-last)/1000);last=t;
- if(state!=='paused')update(dt);
- draw();
- requestAnimationFrame(loop);
+ requestAnimationFrame(loop); // primero: un error nunca detiene el juego
+ if((innerWidth&&innerWidth!==W)||(innerHeight&&innerHeight!==H))resize();
+ const dt=Math.max(0,Math.min(0.033,(t-last)/1000||0));last=t;
+ try{if(state!=='paused')update(dt);draw();}
+ catch(e){if(errShown++<3)console.error('Capi Corre:',e);try{LS.set('lastError',String(e&&e.message||e).slice(0,200));}catch(_){}}
 }
 // ---------- instalar como app ----------
 let deferred=null;
