@@ -1,7 +1,7 @@
 // Capi Corre — juego de carreras infinito con un capibara
 (function(){
 'use strict';
-const VERSION='0.2';
+const VERSION='0.2.1';
 const $=id=>document.getElementById(id);
 const cv=$('c'),ctx=cv.getContext('2d');
 const LS={get(k,d){try{const v=localStorage.getItem('capi_'+k);return v===null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('capi_'+k,JSON.stringify(v))}catch(e){}}};
@@ -497,7 +497,8 @@ if(isIOS&&!standalone())$('installBtn').classList.remove('hidden');
 $('installBtn').onclick=async()=>{audio();sfx.click();
  if(deferred){deferred.prompt();const r=await deferred.userChoice;deferred=null;if(r.outcome==='accepted')$('installBtn').classList.add('hidden');}
  else $('iosTip').classList.toggle('hidden');};
-if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+if('serviceWorker' in navigator){let _rl=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(_rl)return;_rl=true;location.reload();});
+addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{reg.update();document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update();});}).catch(()=>{}));}
 if(standalone()&&screen.orientation&&screen.orientation.lock)screen.orientation.lock('landscape').catch(()=>{});
 resize();refreshTitle();show('title');
 p.y=0;
