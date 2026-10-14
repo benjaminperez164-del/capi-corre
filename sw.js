@@ -1,9 +1,9 @@
 // Service worker de Capi Corre: juego sin conexión
-const V='7';
+const V='8';
 const CACHE='capi-corre-v'+V;
 const ASSETS=['./','./index.html','./style.css?v='+V,'./game.js?v='+V,'./manifest.webmanifest?v='+V,
  './icons/icon-v2-192.png','./icons/icon-v2-512.png','./icons/icon-v2-maskable-512.png','./icons/apple-touch-icon-v2.png','./icons/favicon-v2.png',
- ...['capi_run1','capi_run2','capi_duck','capi_hurt','gallina_run','gallina_flap','gallo_run','gallo_flap'].map(n=>'./img/'+n+'.png?v='+V)];
+ ...['capi_run1','capi_run2','capi_duck','capi_hurt','gallina_run','gallina_glide','gallo_run','gallo_flap'].map(n=>'./img/'+n+'.png?v='+V)];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k.startsWith('capi-corre-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
 self.addEventListener('fetch',e=>{
