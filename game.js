@@ -7,7 +7,7 @@ const HERO_S=1;
 let sprN=0;function sprLoaded(){if(++sprN>=8){const l=document.getElementById('loading');if(l)l.classList.add('hidden');}}
 setTimeout(()=>{const l=document.getElementById('loading');if(l)l.classList.add('hidden');},8000);
 const SPR={},SPR_PX={capi:3.4,gallina:4.3,gallo:4.1};
-['capi_run1','capi_run2','capi_duck','capi_hurt','gallina_run','gallina_glide','gallo_run','gallo_flap'].forEach(n=>{const i=new Image();i.onload=()=>{SPR[n]=i;sprLoaded();if(window.__onSpr)window.__onSpr();};i.onerror=sprLoaded;i.src='img/'+n+'.png?v=11';});
+['capi_run1','capi_run2','capi_duck','capi_hurt','gallina_run','gallina_glide','gallo_run','gallo_flap'].forEach(n=>{const i=new Image();i.onload=()=>{SPR[n]=i;sprLoaded();if(window.__onSpr)window.__onSpr();};i.onerror=sprLoaded;i.src='img/'+n+'.png?v=12';});
 function sprDim(n,id){const i=SPR[n],k=SPR_PX[id];return i?{w:i.width/k,h:i.height/k}:{w:90,h:75};}
 const $=id=>document.getElementById(id);
 const cv=$('c'),ctx=cv.getContext('2d');
@@ -610,7 +610,8 @@ function firstLaunchFlow(){
 }
 const verTag=$('verTag');verTag.textContent='v'+VERSION;
 const showUpdating=()=>{verTag.textContent='Actualizando…';};
-if('serviceWorker' in navigator){let _rl=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(_rl)return;_rl=true;showUpdating();setTimeout(()=>location.reload(),700);});
+if('serviceWorker' in navigator){let _rl=false;const hadCtrl=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(_rl||!hadCtrl)return; // solo al actualizar, no en la primera visita
+_rl=true;showUpdating();setTimeout(()=>location.reload(),700);});
 addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{reg.addEventListener('updatefound',()=>{if(navigator.serviceWorker.controller)showUpdating();});reg.update();document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update();});}).catch(()=>{}));}
 if(standalone()&&screen.orientation&&screen.orientation.lock)screen.orientation.lock('landscape').catch(()=>{});
 resize();refreshTitle();show('title');firstLaunchFlow();
