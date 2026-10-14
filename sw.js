@@ -1,5 +1,5 @@
 // Service worker de Capi Corre: juego sin conexión
-const V='10';
+const V='11';
 const CACHE='capi-corre-v'+V;
 const ASSETS=['./','./index.html','./style.css?v='+V,'./game.js?v='+V,'./manifest.webmanifest?v='+V,
  './icons/icon-v2-192.png','./icons/icon-v2-512.png','./icons/icon-v2-maskable-512.png','./icons/apple-touch-icon-v2.png','./icons/favicon-v2.png',

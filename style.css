@@ -51,3 +51,4 @@ button:active{transform:translateY(3px)}
 .steps{background:#fff;color:#5a3a22;border-radius:18px;padding:10px 18px 10px 38px;text-align:left;font-size:clamp(15px,4.2vmin,20px);line-height:1.6;box-shadow:0 5px 0 #d9b48a}
 .steps .ico{display:inline-block;background:#e8f2ff;border-radius:6px;padding:0 6px;color:#1a73e8}
 @media (max-height:430px){#installCard{gap:6px}#installCard h2{font-size:28px}}
+#verTag{position:fixed;right:max(12px,env(safe-area-inset-right));bottom:max(8px,env(safe-area-inset-bottom));font-size:14px;font-weight:bold;color:#fff;background:rgba(40,60,30,.45);padding:3px 10px;border-radius:12px;pointer-events:none;text-shadow:0 1px 2px rgba(0,0,0,.4)}
