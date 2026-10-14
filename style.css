@@ -38,3 +38,8 @@ button:active{transform:translateY(3px)}
 #rotate{background:rgba(40,30,70,.88)}
 .inst{background:linear-gradient(#8fa8ff,#5a72e0);box-shadow:0 4px 0 #3b4fb0}
 .tip{font-size:15px;font-weight:bold;background:rgba(0,0,0,.35);padding:6px 14px;border-radius:14px}
+#loading{position:fixed;inset:0;z-index:20;background:linear-gradient(#7ec8f0 70%,#7cc94f 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#fff;font-weight:bold;font-size:20px;text-shadow:0 2px 3px rgba(0,0,0,.35)}
+#loading img{width:120px;height:120px;border-radius:26px;box-shadow:0 6px 16px rgba(0,0,0,.25)}
+#loading .dots i{display:inline-block;width:12px;height:12px;margin:0 4px;border-radius:50%;background:#ff9a1f;animation:bop 0.9s infinite ease-in-out}
+#loading .dots i:nth-child(2){animation-delay:.15s}#loading .dots i:nth-child(3){animation-delay:.3s}
+@keyframes bop{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}

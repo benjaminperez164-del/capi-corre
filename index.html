@@ -6,16 +6,19 @@
 <meta name="theme-color" content="#7ec8f0">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍊</text></svg>">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icons/favicon-v2.png">
+<link rel="manifest" href="manifest.webmanifest?v=7">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon-v2.png">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Capi Corre">
+<link rel="apple-touch-startup-image" media="(orientation: portrait)" href="icons/splash-v2-portrait.png">
+<link rel="apple-touch-startup-image" media="(orientation: landscape)" href="icons/splash-v2-landscape.png">
 <title>Capi Corre</title>
-<link rel="stylesheet" href="style.css?v=6">
+<link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
 <canvas id="c"></canvas>
+<div id="loading"><img src="icons/icon-v2-192.png" alt=""><div class="dots"><i></i><i></i><i></i></div><p>Cargando…</p></div>
 <div id="hud" class="hidden"><div id="hudScore">0</div><div id="hudCoins">🪙 0</div></div>
 <button id="muteBtn" class="round" aria-label="Sonido">🔊</button>
 <button id="pauseBtn" class="round hidden" aria-label="Pausa">⏸</button>
@@ -62,6 +65,6 @@
   <p class="sub">Capi corre mejor en horizontal</p>
   <button id="portraitBtn" class="mid">Jugar en vertical</button>
 </div>
-<script src="game.js?v=6"></script>
+<script src="game.js?v=7"></script>
 </body>
 </html>

@@ -1,11 +1,13 @@
 // Capi Corre — juego de carreras infinito con un capibara
 (function(){
 'use strict';
-const VERSION='0.4';
+const VERSION='0.4.1';
 const HERO_S=1;
 // sprites ilustrados (px por unidad de juego)
+let sprN=0;function sprLoaded(){if(++sprN>=8){const l=document.getElementById('loading');if(l)l.classList.add('hidden');}}
+setTimeout(()=>{const l=document.getElementById('loading');if(l)l.classList.add('hidden');},8000);
 const SPR={},SPR_PX={capi:3.4,gallina:4.3,gallo:4.1};
-['capi_run1','capi_run2','capi_duck','capi_hurt','gallina_run','gallina_flap','gallo_run','gallo_flap'].forEach(n=>{const i=new Image();i.onload=()=>{SPR[n]=i;if(window.__onSpr)window.__onSpr();};i.src='img/'+n+'.png?v=6';});
+['capi_run1','capi_run2','capi_duck','capi_hurt','gallina_run','gallina_flap','gallo_run','gallo_flap'].forEach(n=>{const i=new Image();i.onload=()=>{SPR[n]=i;sprLoaded();if(window.__onSpr)window.__onSpr();};i.onerror=sprLoaded;i.src='img/'+n+'.png?v=7';});
 function sprDim(n,id){const i=SPR[n],k=SPR_PX[id];return i?{w:i.width/k,h:i.height/k}:{w:90,h:75};}
 const $=id=>document.getElementById(id);
 const cv=$('c'),ctx=cv.getContext('2d');
@@ -335,10 +337,14 @@ function drawBG(){
  ctx.fillStyle='#9ad86a';ctx.fillRect(0,GY,VW,5);
  // flores y pasto
  const rows=Math.min(18,Math.floor((VH-GY-8)/18));
- for(let r=0;r<rows;r++){const sp=70+r*9,o=(dist*(1+r*0.08)+r*37)%sp,yb=GY+14+r*18;
-  for(let x0=-o;x0<VW+sp;x0+=sp){const k=Math.floor((x0+o+dist*(1+r*0.08))/sp)*7+r*13;const x=x0+((k*53)%41)-20,y=yb+((k*29)%9)-4;
-   if(k%3===0){ctx.fillStyle=k%2?'#ffffff':'#ffd23a';for(let a=0;a<5;a++){ctx.beginPath();ctx.arc(x+Math.cos(a*1.257)*3.2,y+Math.sin(a*1.257)*3.2,2.4,0,6.28);ctx.fill();}
-    ctx.fillStyle=k%2?'#ffc21a':'#f08a1f';ctx.beginPath();ctx.arc(x,y,1.8,0,6.28);ctx.fill();}
+ for(let r=0;r<rows;r++){const sp=70+r*9,off=dist*(1+r*0.08)+r*37,yb=GY+14+r*18;
+  const i0=Math.floor(off/sp)-1,i1=i0+Math.ceil(VW/sp)+3;
+  for(let i=i0;i<=i1;i++){ // posiciones fijas por índice: sin parpadeo
+   let h=(i*73856093)^(r*19349663);h=(h^(h>>>13))*1274126177;h=(h^(h>>>16))>>>0;
+   const x=i*sp-off+(h%41)-20,y=yb+((h>>>8)%9)-4,kind=(h>>>12)%3,white=(h>>>16)&1;
+   if(x<-12||x>VW+12)continue;
+   if(kind===0){ctx.fillStyle=white?'#ffffff':'#ffd23a';for(let a=0;a<5;a++){ctx.beginPath();ctx.arc(x+Math.cos(a*1.257)*3.2,y+Math.sin(a*1.257)*3.2,2.4,0,6.28);ctx.fill();}
+    ctx.fillStyle=white?'#ffc21a':'#f08a1f';ctx.beginPath();ctx.arc(x,y,1.8,0,6.28);ctx.fill();}
    else line(ctx,[x-4,y+2,x-2,y-5,x,y+2,x+3,y-6,x+5,y+2],'#3f8a2c',1.4);}
  }
  const to=dist%46;for(let x=-to;x<VW;x+=46)line(ctx,[x,GY-4,x+3,GY-13,x+6,GY-4,x+10,GY-11,x+12,GY-4],'#3f7a2a',1.8);
@@ -406,7 +412,7 @@ function drawHero(g,id,st){
   n=st.dead||st.rot?'capi_hurt':(st.duck&&st.ground)?'capi_duck':!st.ground?'capi_run2':(fr?'capi_run2':'capi_run1');
  }else{
   const flap=!st.ground&&(st.flapT>0||st.glide||st.vy<0)||(st.rot>0);
-  n=id+(flap||(st.ground&&!st.duck&&fr&&id==='gallo')?'_flap':'_run');
+  n=id==='gallina'?'gallina_run':id+(flap?'_flap':'_run');
   if(id==='gallo'&&st.ground&&!st.duck)n=fr?'gallo_flap':'gallo_run';
  }
  const im=SPR[n];
@@ -420,9 +426,9 @@ function drawHero(g,id,st){
  if(st.squash>0){sx=1+st.squash*0.18;sy=1-st.squash*0.16;}
  if(st.duck&&id!=='capi'){sx*=1.12;sy*=0.66;}
  if(run)g.rotate(Math.sin(st.anim*2)*0.03);
+ else if(id==='gallina'&&!st.ground)g.rotate(st.glide?-0.06+Math.sin(time*9)*0.03:Math.max(-0.15,Math.min(0.15,(st.vy||0)/4000)));
  g.scale(sx,sy);
  if(im){const k=SPR_PX[id],w=im.width/k,h=im.height/k;g.drawImage(im,-w*0.5,-h+2,w,h);}
- else{g.lineCap='round';g.lineJoin='round';if(id==='gallina')hen(g,st);else if(id==='gallo')rooster(g,st);else capy(g,st);}
  g.restore();
 }
 function swing(st,i){return st.ground?Math.sin(st.anim+(i?Math.PI:0)):(i?0.7:-0.5);}
