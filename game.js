@@ -1,13 +1,13 @@
 // Capi Corre — juego de carreras infinito con un capibara
 (function(){
 'use strict';
-const VERSION='0.4.2';
+const VERSION='0.4.3';
 const HERO_S=1;
 // sprites ilustrados (px por unidad de juego)
 let sprN=0;function sprLoaded(){if(++sprN>=8){const l=document.getElementById('loading');if(l)l.classList.add('hidden');}}
 setTimeout(()=>{const l=document.getElementById('loading');if(l)l.classList.add('hidden');},8000);
 const SPR={},SPR_PX={capi:3.4,gallina:4.3,gallo:4.1};
-['capi_run1','capi_run2','capi_duck','capi_hurt','gallina_run','gallina_glide','gallo_run','gallo_flap'].forEach(n=>{const i=new Image();i.onload=()=>{SPR[n]=i;sprLoaded();if(window.__onSpr)window.__onSpr();};i.onerror=sprLoaded;i.src='img/'+n+'.png?v=8';});
+['capi_run1','capi_run2','capi_duck','capi_hurt','gallina_run','gallina_glide','gallo_run','gallo_flap'].forEach(n=>{const i=new Image();i.onload=()=>{SPR[n]=i;sprLoaded();if(window.__onSpr)window.__onSpr();};i.onerror=sprLoaded;i.src='img/'+n+'.png?v=9';});
 function sprDim(n,id){const i=SPR[n],k=SPR_PX[id];return i?{w:i.width/k,h:i.height/k}:{w:90,h:75};}
 const $=id=>document.getElementById(id);
 const cv=$('c'),ctx=cv.getContext('2d');
@@ -21,7 +21,7 @@ let save={best:LS.get('best',0),coins:LS.get('coins',0),owned:LS.get('owned',['c
 function persist(){LS.set('best',save.best);LS.set('coins',save.coins);LS.set('owned',save.owned);LS.set('sel',save.sel);LS.set('mute',save.mute);LS.set('tut',save.tut)}
 
 // ---------- pantalla ----------
-let W=0,H=0,S=1,VW=640,VH=360,GY=298,dpr=1,portraitOK=false;
+let W=0,H=0,S=1,VW=640,VH=360,GY=298,dpr=1,rotateActive=false;
 function resize(){
  W=innerWidth;H=innerHeight;dpr=Math.min(devicePixelRatio||1,2.5);
  cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
@@ -33,9 +33,10 @@ function resize(){
 addEventListener('resize',resize);
 function checkRotate(){
  const portrait=H>W*1.1;
- $('rotate').classList.toggle('hidden',!(portrait&&!portraitOK));
+ if(rotateActive&&!portrait){rotateActive=false;}
+ $('rotate').classList.toggle('hidden',!(rotateActive&&portrait));
 }
-$('portraitBtn').onclick=()=>{portraitOK=true;checkRotate();};
+$('portraitBtn').onclick=()=>{rotateActive=false;checkRotate();};
 
 // ---------- audio ----------
 let ac=null;
@@ -553,16 +554,47 @@ function loop(t){
 let deferred=null;
 const standalone=()=>matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches||navigator.standalone===true;
 const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;if(!standalone())$('installBtn').classList.remove('hidden');});
-addEventListener('appinstalled',()=>{deferred=null;$('installBtn').classList.add('hidden');});
+const flag=k=>LS.get(k,false),setFlag=k=>LS.set(k,true);
+// aviso de girar: solo una vez en total
+function showRotateOnce(){
+ if(flag('rotateHintShown'))return;
+ setFlag('rotateHintShown');
+ if(H>W*1.1){rotateActive=true;checkRotate();}
+}
+function closeInstallCard(installed){
+ $('installCard').classList.add('hidden');setFlag('installPromptDone');
+ if(installed){setFlag('installed');$('installBtn').classList.add('hidden');} // el aviso de girar se mostrará al abrir la app
+ else showRotateOnce();
+}
+function refreshInstallCard(){
+ const b=$('icBtn');
+ if(deferred){b.disabled=false;b.textContent='📲 Instalar app';$('icHint').classList.add('hidden');}
+ else{b.disabled=true;b.textContent='Preparando…';$('icHint').classList.remove('hidden');}
+}
+async function doInstall(){
+ audio();sfx.click();
+ if(!deferred)return false;
+ deferred.prompt();const r=await deferred.userChoice;deferred=null;refreshInstallCard();
+ if(r&&r.outcome==='accepted'){setFlag('installed');$('installBtn').classList.add('hidden');return true;}
+ return false;
+}
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;if(!standalone())$('installBtn').classList.remove('hidden');refreshInstallCard();});
+addEventListener('appinstalled',()=>{deferred=null;setFlag('installed');$('installBtn').classList.add('hidden');if(!$('installCard').classList.contains('hidden'))closeInstallCard(true);});
 if(isIOS&&!standalone())$('installBtn').classList.remove('hidden');
-$('installBtn').onclick=async()=>{audio();sfx.click();
- if(deferred){deferred.prompt();const r=await deferred.userChoice;deferred=null;if(r.outcome==='accepted')$('installBtn').classList.add('hidden');}
- else $('iosTip').classList.toggle('hidden');};
+$('installBtn').onclick=async()=>{if(deferred)await doInstall();else{sfx.click();$('iosTip').classList.toggle('hidden');}};
+$('icBtn').onclick=async()=>{if(await doInstall())closeInstallCard(true);};
+$('icClose').onclick=()=>{sfx.click();closeInstallCard(false);};
+function firstLaunchFlow(){
+ if(standalone()){$('installBtn').classList.add('hidden');showRotateOnce();return;}
+ if(!flag('installPromptDone')&&!flag('installed')){
+  $('icIOS').classList.toggle('hidden',!isIOS);$('icAndroid').classList.toggle('hidden',isIOS);
+  refreshInstallCard();$('installCard').classList.remove('hidden');
+ }else if(!flag('installed'))showRotateOnce();
+}
 if('serviceWorker' in navigator){let _rl=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(_rl)return;_rl=true;location.reload();});
 addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{reg.update();document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update();});}).catch(()=>{}));}
 if(standalone()&&screen.orientation&&screen.orientation.lock)screen.orientation.lock('landscape').catch(()=>{});
-resize();refreshTitle();show('title');
+resize();refreshTitle();show('title');firstLaunchFlow();
 p.y=0;
 requestAnimationFrame(loop);
 window.__capi={drawHero,get GY(){return GY},get state(){return state},get p(){return p},get obs(){return obs},setDist(d){dist=d},jumpPress,jumpRelease,duckOn,duckOff,startGame,VERSION};

@@ -43,3 +43,11 @@ button:active{transform:translateY(3px)}
 #loading .dots i{display:inline-block;width:12px;height:12px;margin:0 4px;border-radius:50%;background:#ff9a1f;animation:bop 0.9s infinite ease-in-out}
 #loading .dots i:nth-child(2){animation-delay:.15s}#loading .dots i:nth-child(3){animation-delay:.3s}
 @keyframes bop{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+#installCard{background:linear-gradient(#7ec8f0 68%,#7cc94f 68%);z-index:15}
+#installCard .round{position:fixed;left:auto;right:max(14px,env(safe-area-inset-right));top:max(12px,env(safe-area-inset-top));z-index:16}
+.icIcon{width:clamp(80px,22vmin,130px);height:clamp(80px,22vmin,130px);border-radius:24%;box-shadow:0 6px 16px rgba(0,0,0,.25)}
+#installCard .big:disabled{background:#c9c9c9;box-shadow:0 5px 0 #9a9a9a;color:#fff}
+#icAndroid{display:flex;flex-direction:column;align-items:center;gap:10px}
+.steps{background:#fff;color:#5a3a22;border-radius:18px;padding:10px 18px 10px 38px;text-align:left;font-size:clamp(15px,4.2vmin,20px);line-height:1.6;box-shadow:0 5px 0 #d9b48a}
+.steps .ico{display:inline-block;background:#e8f2ff;border-radius:6px;padding:0 6px;color:#1a73e8}
+@media (max-height:430px){#installCard{gap:6px}#installCard h2{font-size:28px}}
