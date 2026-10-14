@@ -1,7 +1,7 @@
 // Capi Corre — juego de carreras infinito con un capibara
 (function(){
 'use strict';
-const VERSION='0.1';
+const VERSION='0.1.1';
 const $=id=>document.getElementById(id);
 const cv=$('c'),ctx=cv.getContext('2d');
 const LS={get(k,d){try{const v=localStorage.getItem('capi_'+k);return v===null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('capi_'+k,JSON.stringify(v))}catch(e){}}};
@@ -454,8 +454,20 @@ function loop(t){
  draw();
  requestAnimationFrame(loop);
 }
+// ---------- instalar como app ----------
+let deferred=null;
+const standalone=()=>matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches||navigator.standalone===true;
+const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;if(!standalone())$('installBtn').classList.remove('hidden');});
+addEventListener('appinstalled',()=>{deferred=null;$('installBtn').classList.add('hidden');});
+if(isIOS&&!standalone())$('installBtn').classList.remove('hidden');
+$('installBtn').onclick=async()=>{audio();sfx.click();
+ if(deferred){deferred.prompt();const r=await deferred.userChoice;deferred=null;if(r.outcome==='accepted')$('installBtn').classList.add('hidden');}
+ else $('iosTip').classList.toggle('hidden');};
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+if(standalone()&&screen.orientation&&screen.orientation.lock)screen.orientation.lock('landscape').catch(()=>{});
 resize();refreshTitle();show('title');
 p.y=0;
 requestAnimationFrame(loop);
-window.__capi={get GY(){return GY},get state(){return state},get p(){return p},get obs(){return obs},setDist(d){dist=d},jumpPress,jumpRelease,duckOn,duckOff,startGame,VERSION};
+window.__capi={drawHero,get GY(){return GY},get state(){return state},get p(){return p},get obs(){return obs},setDist(d){dist=d},jumpPress,jumpRelease,duckOn,duckOff,startGame,VERSION};
 })();

@@ -36,3 +36,5 @@ button:active{transform:translateY(3px)}
 @keyframes rot{0%,30%{transform:rotate(0)}60%,100%{transform:rotate(90deg)}}
 @media (max-height:430px){.screen{gap:8px}.card{padding:6px 20px}}
 #rotate{background:rgba(40,30,70,.88)}
+.inst{background:linear-gradient(#8fa8ff,#5a72e0);box-shadow:0 4px 0 #3b4fb0}
+.tip{font-size:15px;font-weight:bold;background:rgba(0,0,0,.35);padding:6px 14px;border-radius:14px}
